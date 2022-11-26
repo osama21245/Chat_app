@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+late User signinuser;
+
 class Chatscreen extends StatefulWidget {
   const Chatscreen({super.key});
 
@@ -22,8 +24,8 @@ class _ChatscreenState extends State<Chatscreen> {
 
   final _auth = FirebaseAuth.instance;
   final _firestor = FirebaseFirestore.instance;
+  final messageedtingcontoolre = TextEditingController();
 
-  late User signinuser;
   String? YourMessage;
 
   void getCurrentuser() {
@@ -32,6 +34,7 @@ class _ChatscreenState extends State<Chatscreen> {
     try {
       if (user != null) {
         signinuser = user;
+
         print(signinuser.email);
       }
     } catch (e) {
@@ -54,16 +57,14 @@ class _ChatscreenState extends State<Chatscreen> {
       appBar: AppBar(
         actions: [
           IconButton(
-              onPressed: () {
-                // try {
-                //   await _auth.signOut();
-                // } catch (e) {
-                //   print(e);
-                // }
+              onPressed: () async {
+                try {
+                  await _auth.signOut();
+                } catch (e) {
+                  print(e);
+                }
 
-                // Navigator.pop(context);
-
-                getmessages();
+                Navigator.pop(context);
               },
               icon: Icon(Icons.close))
         ],
@@ -88,29 +89,7 @@ class _ChatscreenState extends State<Chatscreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          StreamBuilder<QuerySnapshot>(
-              stream: _firestor.collection('messages').snapshots(),
-              builder: (context, snapshot) {
-                List<sendline> messagewidget = [];
-
-                if (!snapshot.hasData) {}
-
-                final messages = snapshot.data!.docs;
-
-                for (var message in messages) {
-                  final sendtext = message.get('text');
-                  final emailsender = message.get('sender');
-                  final messageswidget =
-                      sendline(sendtext: sendtext, emailsender: emailsender);
-
-                  messagewidget.add(messageswidget);
-                }
-                return Expanded(
-                  child: ListView(
-                    children: messagewidget,
-                  ),
-                );
-              }),
+          messageStreambuilder(firestor: _firestor),
           Container(
             decoration: BoxDecoration(
                 border: Border(
@@ -120,6 +99,7 @@ class _ChatscreenState extends State<Chatscreen> {
               children: [
                 Expanded(
                   child: TextField(
+                    controller: messageedtingcontoolre,
                     onChanged: (Value) {
                       YourMessage = Value;
                     },
@@ -135,8 +115,12 @@ class _ChatscreenState extends State<Chatscreen> {
                       const EdgeInsets.symmetric(vertical: 3, horizontal: 9),
                   child: TextButton(
                     onPressed: () {
-                      _firestor.collection('messages').add(
-                          {'text': YourMessage, 'sender': signinuser.email});
+                      messageedtingcontoolre.clear();
+                      _firestor.collection('messages').add({
+                        'text': YourMessage,
+                        'sender': signinuser.email,
+                        'time': FieldValue.serverTimestamp(),
+                      });
                     },
                     child: Text('Send'),
                     style: TextButton.styleFrom(
@@ -153,15 +137,60 @@ class _ChatscreenState extends State<Chatscreen> {
   }
 }
 
+class messageStreambuilder extends StatelessWidget {
+  const messageStreambuilder({
+    Key? key,
+    required FirebaseFirestore firestor,
+  })  : _firestor = firestor,
+        super(key: key);
+
+  final FirebaseFirestore _firestor;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+        stream: _firestor.collection('messages').orderBy('time').snapshots(),
+        builder: (context, snapshot) {
+          List<sendline> messagewidget = [];
+
+          if (!snapshot.hasData) {}
+
+          final messages = snapshot.data!.docs.reversed;
+
+          for (var message in messages) {
+            final sendtext = message.get('text');
+            final emailsender = message.get('sender');
+            final currentuser = signinuser.email;
+
+            final messageswidget = sendline(
+              sendtext: sendtext,
+              emailsender: emailsender,
+              isMe: currentuser == emailsender,
+            );
+
+            messagewidget.add(messageswidget);
+          }
+          return Expanded(
+            child: ListView(
+              reverse: true,
+              children: messagewidget,
+            ),
+          );
+        });
+  }
+}
+
 class sendline extends StatelessWidget {
   const sendline({
     Key? key,
     required this.sendtext,
     required this.emailsender,
+    required this.isMe,
   }) : super(key: key);
 
   final String sendtext;
   final String emailsender;
+  final bool isMe;
 
   @override
   Widget build(BuildContext context) {
@@ -170,16 +199,33 @@ class sendline extends StatelessWidget {
       padding: EdgeInsets.symmetric(
           horizontal: size.width * 0.02, vertical: size.height * 0.01),
       child: Column(
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          Text('$emailsender'),
+          Text(
+            '$emailsender',
+            style: TextStyle(
+                color: Color.fromARGB(255, 161, 113, 172), fontSize: 13),
+          ),
           Material(
-            color: Colors.blue[800],
+            elevation: 5,
+            borderRadius: isMe
+                ? BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30))
+                : BorderRadius.only(
+                    topRight: Radius.circular(30),
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30)),
+            color: isMe ? Colors.blue[800] : Colors.white,
             child: Padding(
               padding: EdgeInsets.symmetric(
                   vertical: size.height * 0.01, horizontal: size.width * 0.02),
               child: Text(
-                "$sendtext-$emailsender",
-                style: TextStyle(fontSize: 20, color: Colors.white),
+                "$sendtext",
+                style: TextStyle(
+                    fontSize: 15, color: isMe ? Colors.white : Colors.black45),
               ),
             ),
           ),

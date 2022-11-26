@@ -5,6 +5,7 @@ import './screens/loginscreen.dart';
 import './screens/signinscreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import './screens/awesomedialogescreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,12 +18,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _auth = FirebaseAuth.instance;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'chatapp',
       theme: ThemeData(),
       // home: Welcomescreen(),
-      initialRoute: Welcomescreen.screenRoute,
+      initialRoute: _auth.currentUser != null
+          ? Chatscreen.screenRoute
+          : Welcomescreen.screenRoute,
       routes: {
         Welcomescreen.screenRoute: (context) => Welcomescreen(),
         Signinscreen.screenRoute: (context) => Signinscreen(),
