@@ -6,14 +6,14 @@ class passtextfield extends StatefulWidget {
       required this.size,
       required this.Title,
       required this.icon,
-      required this.onchange,
-      required this.color})
+      required this.color,
+      required this.mycontrooler})
       : super(key: key);
+  TextEditingController mycontrooler;
   Color color;
   final Size size;
   String Title;
   Icon icon;
-  Function(String) onchange;
 
   @override
   State<passtextfield> createState() => _passtextfieldState();
@@ -21,7 +21,9 @@ class passtextfield extends StatefulWidget {
 
 class _passtextfieldState extends State<passtextfield> {
   bool showtext = true;
+
   GlobalKey<FormState> formstate = new GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -30,15 +32,18 @@ class _passtextfieldState extends State<passtextfield> {
             borderRadius: BorderRadiusDirectional.circular(66)),
         width: widget.size.width * 0.68,
         child: TextFormField(
+          controller: widget.mycontrooler,
           validator: (value) {
             if (value!.length > 100) {
               return "Password can't be larger than 100 letter";
+            }
+            if (value.length == 0) {
+              return "This field can`t be empty";
             }
             if (value.length < 4) {
               return "Password  can't be less than 4 letter";
             }
           },
-          onChanged: widget.onchange,
           obscureText: showtext,
           decoration: InputDecoration(
               hintStyle: TextStyle(fontSize: 19, fontWeight: FontWeight.w400),

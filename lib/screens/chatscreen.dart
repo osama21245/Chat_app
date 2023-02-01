@@ -1,3 +1,4 @@
+import 'package:chat_app2/screens/welcomescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -64,7 +65,8 @@ class _ChatscreenState extends State<Chatscreen> {
                   print(e);
                 }
 
-                Navigator.pop(context);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                    Welcomescreen.screenRoute, (route) => false);
               },
               icon: Icon(Icons.close))
         ],

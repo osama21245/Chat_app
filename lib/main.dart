@@ -4,7 +4,7 @@ import './screens/chatscreen.dart';
 import './screens/loginscreen.dart';
 import './screens/signinscreen.dart';
 import 'package:firebase_core/firebase_core.dart';
-import './screens/awesomedialogescreen.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
@@ -32,7 +32,6 @@ class MyApp extends StatelessWidget {
         Signinscreen.screenRoute: (context) => Signinscreen(),
         Chatscreen.screenRoute: (context) => Chatscreen(),
         Loginscreen.screenRoute: (context) => Loginscreen(),
-        awesomeee.screenRoute: (context) => awesomeee()
       },
     );
   }

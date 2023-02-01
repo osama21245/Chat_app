@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../chat_app/icons"
+		},
+		{
+			"path": "../chat_app/images"
+		},
+		{
+			"path": "../chat_app/fonts"
+		}
+	],
+	"settings": {}
+}

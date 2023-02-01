@@ -76,9 +76,10 @@ class _SigninscreenState extends State<Signinscreen> {
   }
 
   Widget build(BuildContext context) {
+    TextEditingController email = TextEditingController();
+    TextEditingController password = TextEditingController();
     final _auth = FirebaseAuth.instance;
-    String? password;
-    String? email;
+
     bool showspiner = false;
     Size size = MediaQuery.of(context).size;
     return SafeArea(
@@ -123,9 +124,7 @@ class _SigninscreenState extends State<Signinscreen> {
                           padding: const EdgeInsets.symmetric(
                               vertical: 4, horizontal: 3),
                           child: emailtextfield(
-                            onchange: (Value) {
-                              email = Value;
-                            },
+                            mycontroler: email,
                             size: size,
                             Title: 'Your Email:',
                             icon: Icon(Icons.person),
@@ -139,9 +138,7 @@ class _SigninscreenState extends State<Signinscreen> {
                               vertical: 4, horizontal: 3),
                           child: passtextfield(
                             color: Color.fromARGB(255, 122, 122, 122),
-                            onchange: (Value) {
-                              password = Value;
-                            },
+                            mycontrooler: password,
                             size: size,
                             Title: 'Password:',
                             icon: Icon(Icons.lock),
@@ -165,8 +162,8 @@ class _SigninscreenState extends State<Signinscreen> {
                               try {
                                 final newuser =
                                     await _auth.createUserWithEmailAndPassword(
-                                        email: email ?? "",
-                                        password: password ?? "");
+                                        email: email.text,
+                                        password: password.text);
                               } on FirebaseAuthException catch (e) {
                                 if (e.code == 'weak-password') {
                                   setState(() {
@@ -211,8 +208,8 @@ class _SigninscreenState extends State<Signinscreen> {
                                     animType: AnimType.scale,
                                     title: 'you make your account',
                                     btnOkOnPress: () {
-                                      Navigator.pushNamed(
-                                          context, Chatscreen.screenRoute);
+                                      Navigator.pushReplacementNamed(
+                                          context, Loginscreen.screenRoute);
                                     },
                                     btnOkText: 'login')
                                   ..show();

@@ -22,9 +22,10 @@ class Loginscreen extends StatefulWidget {
 class _LoginscreenState extends State<Loginscreen> {
   GlobalKey<FormState> formstate = new GlobalKey<FormState>();
   Widget build(BuildContext context) {
+    TextEditingController email = TextEditingController();
     final _auth = FirebaseAuth.instance;
-    String? password;
-    String? email;
+    TextEditingController password = TextEditingController();
+
     Size size = MediaQuery.of(context).size;
 
     return SafeArea(
@@ -67,9 +68,7 @@ class _LoginscreenState extends State<Loginscreen> {
                         padding: const EdgeInsets.symmetric(
                             vertical: 4, horizontal: 3),
                         child: emailtextfield(
-                            onchange: (Value) {
-                              email = Value;
-                            },
+                            mycontroler: email,
                             size: size,
                             Title: 'Your Email:',
                             icon: Icon(Icons.person)),
@@ -82,9 +81,7 @@ class _LoginscreenState extends State<Loginscreen> {
                             vertical: 4, horizontal: 3),
                         child: passtextfield(
                             color: Color.fromARGB(255, 95, 95, 95),
-                            onchange: (Value) {
-                              password = Value;
-                            },
+                            mycontrooler: password,
                             size: size,
                             Title: 'Password:',
                             icon: Icon(Icons.lock)),
@@ -102,12 +99,11 @@ class _LoginscreenState extends State<Loginscreen> {
                             }
                             final newuser =
                                 await _auth.signInWithEmailAndPassword(
-                                    email: email ?? "",
-                                    password: password ?? "");
+                                    email: email.text, password: password.text);
                             print(newuser);
                             if (newuser != null) {
-                              Navigator.pushNamed(
-                                  context, Chatscreen.screenRoute);
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                  Chatscreen.screenRoute, (route) => false);
                             }
                           }),
                       SizedBox(
